@@ -1,0 +1,19 @@
+{
+  "name": "duo-clock",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "A free shared focus timer for two people.",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test": "node --test"
+  },
+  "dependencies": {
+    "firebase": "^11.0.0"
+  },
+  "devDependencies": {
+    "vite": "^6.0.0"
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "rules": {
+    ".read": false,
+    ".write": false,
+    "rooms": {
+      "$room": {
+        ".read": "$room.length >= 16",
+        ".write": "$room.length >= 16"
+      }
+    }
+  }
+}

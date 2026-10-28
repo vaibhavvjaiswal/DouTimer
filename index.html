@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0a0a0a">
+<meta name="description" content="A free shared focus timer for two. One countdown, no camera, no accounts.">
+<title>Duo Clock</title>
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300..600&family=Geist:wght@300..700&family=Geist+Mono:wght@400..600&display=swap">
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="#focus" aria-label="Duo Clock">
+      <svg width="26" height="26" viewBox="0 0 26 26" fill="none" aria-hidden="true"><circle cx="10" cy="13" r="8" stroke="currentColor" stroke-width="2"/><circle cx="16" cy="13" r="8" stroke="var(--accent)" stroke-width="2"/></svg>
+      Duo Clock
+    </a>
+    <nav class="tabs" aria-label="Sections">
+      <a href="#focus" data-v="focus">Focus</a>
+      <a href="#play" data-v="play">Play</a>
+      <a href="#together" data-v="together">Together</a>
+      <a href="#stats" data-v="stats">Stats</a>
+      <a href="#prefs" data-v="prefs">Settings</a>
+    </nav>
+    <span class="pill"><span class="dot" id="hdrDot"></span><span id="hdrText">Just you</span></span>
+  </header>
+
+  <main>
+    <div id="notice"></div>
+
+    <!-- FOCUS -->
+    <section class="view" id="v-focus" aria-label="Focus">
+      <div class="grid2" style="grid-template-columns:1fr;gap:20px">
+        <div id="setup" class="card" hidden>
+          <h3 style="margin-bottom:6px">Who is here?</h3>
+          <p class="muted small" style="margin:0 0 14px">Your name shows on their screen next to your goal.</p>
+          <form class="row" id="setupForm">
+            <input type="text" id="setupName" placeholder="Your name" maxlength="24" autocomplete="off" aria-label="Your name">
+            <button class="btn primary" type="submit">Save</button>
+          </form>
+        </div>
+        <div id="standBanner" class="banner" hidden></div>
+
+        <div class="card timer">
+          <div class="status"><span id="stRound">No session yet</span><span aria-hidden="true">·</span><span id="stPres">Just you</span></div>
+          <div class="clock" id="clock" data-style="ring" role="timer" aria-label="Shared countdown">
+            <svg viewBox="0 0 200 200" aria-hidden="true">
+              <circle cx="100" cy="100" r="90" fill="none" stroke="var(--line)" stroke-width="5"/>
+              <circle id="ring" cx="100" cy="100" r="90" fill="none" stroke="var(--accent)" stroke-width="5" stroke-linecap="round" transform="rotate(-90 100 100)"/>
+            </svg>
+            <div class="face"><div class="digits" id="digits">25:00</div><div class="phase" id="phase">Ready</div><div class="bar"><i id="barFill"></i></div></div>
+          </div>
+          <div class="chips" id="pickRow">
+            <span id="chips" class="chips"></span>
+            <input type="number" id="customMin" min="1" max="600" inputmode="numeric" aria-label="Custom minutes" placeholder="min">
+          </div>
+          <div class="row" id="controls" style="justify-content:center"></div>
+          <div class="streak" id="streakLine"></div>
+        </div>
+
+        <div class="grid2">
+          <div class="card goal">
+            <div class="who"><span class="dot on"></span><span id="meName">You</span></div>
+            <input type="text" id="myGoal" maxlength="120" placeholder="What are you working on?" autocomplete="off" aria-label="Your goal">
+          </div>
+          <div class="card goal">
+            <div class="who"><span class="dot" id="pDot"></span><span id="pName">Your person</span><span id="pTime" style="margin-left:auto;font-family:var(--font-num);font-variant-numeric:tabular-nums"></span></div>
+            <div class="text empty" id="pGoal">Waiting for them.</div>
+            <div><button class="btn sm" id="copyInvite" type="button">Copy invite link</button></div>
+          </div>
+        </div>
+
+        <div class="row">
+          <button class="btn" id="pingBtn" type="button">Ping them</button>
+          <span class="muted small" id="pingNote"></span>
+        </div>
+        <details class="chat" id="chatBox">
+          <summary><span>Chat</span><span class="badge" id="unread" hidden>0</span><span class="muted small" style="margin-left:auto">Gone when you both leave</span></summary>
+          <div class="msgs" id="msgs"></div>
+          <form class="send" id="chatForm"><input type="text" id="chatIn" maxlength="300" placeholder="Say something" autocomplete="off" aria-label="Message"><button class="btn primary" type="submit">Send</button></form>
+        </details>
+      </div>
+    </section>
+
+    <!-- PLAY -->
+    <section class="view" id="v-play" aria-label="Four in a Row" hidden>
+      <div class="card" style="display:grid;gap:18px;justify-items:start">
+        <div><h3>Four in a row</h3><p class="muted small" style="margin:4px 0 0">Take your turn whenever you open the page. The board waits for whoever is away.</p></div>
+        <div class="score" id="score"></div>
+        <div id="gStatus" style="font-size:17px;font-weight:600"></div>
+        <div class="board" id="board"></div>
+        <div class="row">
+          <button class="btn primary" id="rematch" type="button">New game</button>
+          <button class="btn sm" id="resetGame" type="button">Reset seats and scores</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- TOGETHER -->
+    <section class="view" id="v-together" aria-label="Together" hidden>
+      <div style="display:grid;gap:20px">
+        <div class="grid2" id="clocks"></div>
+        <div class="card" style="display:grid;gap:14px">
+          <h2>Next visit</h2>
+          <div class="big" id="visitBig">–</div>
+          <div class="muted small" id="visitSub">Set the date you next see each other.</div>
+          <div class="row">
+            <input type="date" id="visitDate" aria-label="Next visit date">
+            <input type="text" id="visitLabel" maxlength="40" placeholder="Label (optional)" aria-label="Label" autocomplete="off">
+          </div>
+        </div>
+        <div class="card" style="display:grid;gap:14px">
+          <h2>Standing sessions</h2>
+          <p class="muted small" style="margin:0">A repeating time you both show up for. While this page is open, a banner appears on the Focus tab when it is time.</p>
+          <div class="list" id="standList"></div>
+          <div style="display:grid;gap:12px;border-top:1px solid var(--line);padding-top:16px">
+            <div class="days" id="standDays"></div>
+            <div class="row">
+              <input type="time" id="standTime" value="19:00" aria-label="Time">
+              <input type="number" id="standMin" value="50" min="1" max="600" style="width:96px" aria-label="Minutes">
+              <span class="muted small">min</span>
+              <button class="btn primary" id="standAdd" type="button">Add</button>
+            </div>
+            <div class="muted small" id="standTz"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- STATS -->
+    <section class="view" id="v-stats" aria-label="Stats" hidden>
+      <div id="statsBody" style="display:grid;gap:20px"></div>
+    </section>
+
+    <!-- SETTINGS -->
+    <section class="view" id="v-prefs" aria-label="Settings" hidden>
+      <div class="card">
+        <div class="set">
+          <h2>Room</h2>
+          <p class="muted small" style="margin:0" id="roomInfo"></p>
+          <div class="row"><input type="text" id="inviteLink" readonly aria-label="Invite link" style="flex:1;min-width:200px"><button class="btn sm" id="copyInvite2" type="button">Copy</button></div>
+          <div class="row"><button class="btn warn sm" id="newRoom" type="button">Start a new room</button><span class="muted small">Gives you a fresh, empty room and a new invite link.</span></div>
+        </div>
+        <div class="set">
+          <h2>You</h2>
+          <div class="fields">
+            <label class="f">Name<input type="text" id="inName" maxlength="24" autocomplete="off"></label>
+            <label class="f">Time zone<input type="text" id="inTz" list="tzs" autocomplete="off"></label>
+          </div>
+          <datalist id="tzs"></datalist>
+        </div>
+        <div class="set">
+          <h2>Sessions (shared)</h2>
+          <div class="fields">
+            <label class="f">Quick lengths (minutes)<input type="text" id="inPresets" placeholder="25, 50, 90"></label>
+            <label class="f">Break<input type="number" id="inBreak" min="1" max="120"></label>
+            <label class="f">Long break<input type="number" id="inLong" min="1" max="180"></label>
+            <label class="f">Long break every (rounds)<input type="number" id="inEvery" min="2" max="12"></label>
+          </div>
+          <label class="chk"><input type="checkbox" id="inAuto"> Start the break automatically when a round ends</label>
+        </div>
+        <div class="set">
+          <h2>Look (this device)</h2>
+          <div class="opt"><span>Theme</span><div class="seg" data-pref="theme"><button data-val="dark">Dark</button><button data-val="light">Light</button><button data-val="system">Match system</button></div></div>
+          <div class="opt"><span>Accent</span><div class="row" id="swatches" style="gap:10px"></div></div>
+          <div class="opt"><span>Typeface</span><div class="seg" data-pref="font"><button data-val="sans">Sans</button><button data-val="serif">Serif</button><button data-val="mono">Mono</button></div></div>
+          <div class="opt"><span>Timer</span><div class="seg" data-pref="style"><button data-val="ring">Ring</button><button data-val="bar">Bar</button><button data-val="digits">Digits</button></div></div>
+          <div class="opt"><span>Clock format</span><div class="seg" data-pref="h24"><button data-val="true">24 hour</button><button data-val="false">12 hour</button></div></div>
+        </div>
+        <div class="set">
+          <h2>Sound (this device)</h2>
+          <label class="chk"><input type="checkbox" id="inChime"> Play a chime when a round ends or they ping you</label>
+          <div class="row"><input type="range" id="inVol" min="0" max="1" step="0.05" aria-label="Volume"><button class="btn sm" id="testChime" type="button">Test</button></div>
+        </div>
+        <div class="set">
+          <h2>History</h2>
+          <div class="row"><button class="btn warn sm" id="clearHist" type="button">Clear focus history</button><span class="muted small">Removes it for both of you.</span></div>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script type="module" src="/src/main.js"></script>
+</body>
+</html>
